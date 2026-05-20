@@ -41,14 +41,14 @@ public final class DuddyDatabase_Impl extends DuddyDatabase {
   @Override
   @NonNull
   protected SupportSQLiteOpenHelper createOpenHelper(@NonNull final DatabaseConfiguration config) {
-    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(1) {
+    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(2) {
       @Override
       public void createAllTables(@NonNull final SupportSQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS `phrase_review` (`phrase_id` TEXT NOT NULL, `due_date` TEXT NOT NULL, `interval_days` INTEGER NOT NULL, `ease_factor` REAL NOT NULL, `review_count` INTEGER NOT NULL, `correct_streak` INTEGER NOT NULL, `last_score` INTEGER, `updated_at` INTEGER NOT NULL, `synced` INTEGER NOT NULL, PRIMARY KEY(`phrase_id`))");
         db.execSQL("CREATE TABLE IF NOT EXISTS `favorite_phrase` (`phrase_id` TEXT NOT NULL, `created_at` INTEGER NOT NULL, `synced` INTEGER NOT NULL, PRIMARY KEY(`phrase_id`))");
-        db.execSQL("CREATE TABLE IF NOT EXISTS `progress_stats` (`id` INTEGER NOT NULL, `lessons_started` INTEGER NOT NULL, `practiced_phrases` INTEGER NOT NULL, `sample_audio_plays` INTEGER NOT NULL, `speaking_attempts` INTEGER NOT NULL, `ai_coach_requests` INTEGER NOT NULL, `streak_days` INTEGER NOT NULL, `last_active_date` TEXT, `total_xp` INTEGER NOT NULL, `longest_streak` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `progress_stats` (`id` INTEGER NOT NULL, `lessons_started` INTEGER NOT NULL, `practiced_phrases` INTEGER NOT NULL, `sample_audio_plays` INTEGER NOT NULL, `speaking_attempts` INTEGER NOT NULL, `ai_coach_requests` INTEGER NOT NULL, `streak_days` INTEGER NOT NULL, `last_active_date` TEXT, `total_xp` INTEGER NOT NULL, `longest_streak` INTEGER NOT NULL, `hearts` INTEGER NOT NULL, `max_hearts` INTEGER NOT NULL, `last_heart_refill_at` INTEGER NOT NULL, `daily_xp_goal` INTEGER NOT NULL, `today_xp` INTEGER NOT NULL, `today_xp_date` TEXT, `weekly_league_xp` INTEGER NOT NULL, `league_name` TEXT NOT NULL, `league_week_id` TEXT, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`id`))");
         db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '92c21b441a21545e5b1f7d7e02b34c0e')");
+        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1006a6e24547c2377c68705c0f144d68')");
       }
 
       @Override
@@ -131,7 +131,7 @@ public final class DuddyDatabase_Impl extends DuddyDatabase {
                   + " Expected:\n" + _infoFavoritePhrase + "\n"
                   + " Found:\n" + _existingFavoritePhrase);
         }
-        final HashMap<String, TableInfo.Column> _columnsProgressStats = new HashMap<String, TableInfo.Column>(11);
+        final HashMap<String, TableInfo.Column> _columnsProgressStats = new HashMap<String, TableInfo.Column>(20);
         _columnsProgressStats.put("id", new TableInfo.Column("id", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsProgressStats.put("lessons_started", new TableInfo.Column("lessons_started", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsProgressStats.put("practiced_phrases", new TableInfo.Column("practiced_phrases", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -142,6 +142,15 @@ public final class DuddyDatabase_Impl extends DuddyDatabase {
         _columnsProgressStats.put("last_active_date", new TableInfo.Column("last_active_date", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsProgressStats.put("total_xp", new TableInfo.Column("total_xp", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsProgressStats.put("longest_streak", new TableInfo.Column("longest_streak", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsProgressStats.put("hearts", new TableInfo.Column("hearts", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsProgressStats.put("max_hearts", new TableInfo.Column("max_hearts", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsProgressStats.put("last_heart_refill_at", new TableInfo.Column("last_heart_refill_at", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsProgressStats.put("daily_xp_goal", new TableInfo.Column("daily_xp_goal", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsProgressStats.put("today_xp", new TableInfo.Column("today_xp", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsProgressStats.put("today_xp_date", new TableInfo.Column("today_xp_date", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsProgressStats.put("weekly_league_xp", new TableInfo.Column("weekly_league_xp", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsProgressStats.put("league_name", new TableInfo.Column("league_name", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsProgressStats.put("league_week_id", new TableInfo.Column("league_week_id", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsProgressStats.put("updated_at", new TableInfo.Column("updated_at", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysProgressStats = new HashSet<TableInfo.ForeignKey>(0);
         final HashSet<TableInfo.Index> _indicesProgressStats = new HashSet<TableInfo.Index>(0);
@@ -154,7 +163,7 @@ public final class DuddyDatabase_Impl extends DuddyDatabase {
         }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "92c21b441a21545e5b1f7d7e02b34c0e", "cb4906721c8115fc1a3cd3bfeb45a068");
+    }, "1006a6e24547c2377c68705c0f144d68", "3b94983baf8e696e797138afa870f8bc");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(config.context).name(config.name).callback(_openCallback).build();
     final SupportSQLiteOpenHelper _helper = config.sqliteOpenHelperFactory.create(_sqliteConfig);
     return _helper;

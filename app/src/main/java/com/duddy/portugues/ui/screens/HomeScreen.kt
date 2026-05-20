@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.duddy.portugues.data.model.DailyGoalProgress
 import com.duddy.portugues.data.model.GuidedSessionStep
+import com.duddy.portugues.data.model.ProgressStats
 
 @Composable
 fun HomeScreen(
@@ -29,6 +30,7 @@ fun HomeScreen(
     favoriteCount: Int,
     dueReviewCount: Int,
     dailyGoal: DailyGoalProgress,
+    stats: ProgressStats,
     guidedSessionSteps: List<GuidedSessionStep>,
     statusMessage: String,
     onStartSmartReview: () -> Unit,
@@ -72,8 +74,11 @@ fun HomeScreen(
             onStartGuidedSession = onStartGuidedSession
         )
 
+        GamificationSummaryCard(stats = stats)
+
         DailyGoalCard(
             dailyGoal = dailyGoal,
+            stats = stats,
             onStartGuidedSession = onStartGuidedSession
         )
 
@@ -108,6 +113,7 @@ fun HomeScreen(
 @Composable
 private fun DailyGoalCard(
     dailyGoal: DailyGoalProgress,
+    stats: ProgressStats,
     onStartGuidedSession: () -> Unit
 ) {
     Card(
@@ -130,7 +136,7 @@ private fun DailyGoalCard(
                 modifier = Modifier.fillMaxWidth()
             )
             Text(
-                text = "${dailyGoal.percentComplete}% complete · ${dailyGoal.streakDays} day streak",
+                text = "${stats.todayXp}/${stats.dailyXpGoal} XP today · ${stats.dailyXpPercent}% XP goal",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -152,6 +158,41 @@ private fun DailyGoalCard(
             ) {
                 Text("Start today's session")
             }
+        }
+    }
+}
+
+@Composable
+private fun GamificationSummaryCard(stats: ProgressStats) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = "Level ${stats.level}",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            LinearProgressIndicator(
+                progress = { stats.levelProgressPercent / 100f },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(
+                text = "${stats.totalXp} total XP · ${stats.xpIntoCurrentLevel}/${stats.xpNeededForNextLevel} toward next level",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "${stats.streakDays} day streak · longest ${stats.longestStreak} · hearts ${stats.hearts}/${stats.maxHearts}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }

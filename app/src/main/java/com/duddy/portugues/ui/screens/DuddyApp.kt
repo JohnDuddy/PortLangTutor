@@ -63,6 +63,7 @@ fun DuddyApp(viewModel: TutorViewModel) {
                     favoriteCount = uiState.favoritePhraseIds.size,
                     dueReviewCount = uiState.dueReviewCount,
                     dailyGoal = uiState.dailyGoal,
+                    stats = uiState.stats,
                     guidedSessionSteps = uiState.guidedSessionSteps,
                     statusMessage = uiState.statusMessage,
                     onStartSmartReview = viewModel::startSmartReview,

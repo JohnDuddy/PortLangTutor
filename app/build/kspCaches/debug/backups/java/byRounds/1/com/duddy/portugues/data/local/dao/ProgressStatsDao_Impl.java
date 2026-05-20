@@ -41,7 +41,7 @@ public final class ProgressStatsDao_Impl implements ProgressStatsDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT INTO `progress_stats` (`id`,`lessons_started`,`practiced_phrases`,`sample_audio_plays`,`speaking_attempts`,`ai_coach_requests`,`streak_days`,`last_active_date`,`total_xp`,`longest_streak`,`updated_at`) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+        return "INSERT INTO `progress_stats` (`id`,`lessons_started`,`practiced_phrases`,`sample_audio_plays`,`speaking_attempts`,`ai_coach_requests`,`streak_days`,`last_active_date`,`total_xp`,`longest_streak`,`hearts`,`max_hearts`,`last_heart_refill_at`,`daily_xp_goal`,`today_xp`,`today_xp_date`,`weekly_league_xp`,`league_name`,`league_week_id`,`updated_at`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -61,13 +61,30 @@ public final class ProgressStatsDao_Impl implements ProgressStatsDao {
         }
         statement.bindLong(9, entity.getTotalXp());
         statement.bindLong(10, entity.getLongestStreak());
-        statement.bindLong(11, entity.getUpdatedAt());
+        statement.bindLong(11, entity.getHearts());
+        statement.bindLong(12, entity.getMaxHearts());
+        statement.bindLong(13, entity.getLastHeartRefillAt());
+        statement.bindLong(14, entity.getDailyXpGoal());
+        statement.bindLong(15, entity.getTodayXp());
+        if (entity.getTodayXpDate() == null) {
+          statement.bindNull(16);
+        } else {
+          statement.bindString(16, entity.getTodayXpDate());
+        }
+        statement.bindLong(17, entity.getWeeklyLeagueXp());
+        statement.bindString(18, entity.getLeagueName());
+        if (entity.getLeagueWeekId() == null) {
+          statement.bindNull(19);
+        } else {
+          statement.bindString(19, entity.getLeagueWeekId());
+        }
+        statement.bindLong(20, entity.getUpdatedAt());
       }
     }, new EntityDeletionOrUpdateAdapter<ProgressStatsEntity>(__db) {
       @Override
       @NonNull
       protected String createQuery() {
-        return "UPDATE `progress_stats` SET `id` = ?,`lessons_started` = ?,`practiced_phrases` = ?,`sample_audio_plays` = ?,`speaking_attempts` = ?,`ai_coach_requests` = ?,`streak_days` = ?,`last_active_date` = ?,`total_xp` = ?,`longest_streak` = ?,`updated_at` = ? WHERE `id` = ?";
+        return "UPDATE `progress_stats` SET `id` = ?,`lessons_started` = ?,`practiced_phrases` = ?,`sample_audio_plays` = ?,`speaking_attempts` = ?,`ai_coach_requests` = ?,`streak_days` = ?,`last_active_date` = ?,`total_xp` = ?,`longest_streak` = ?,`hearts` = ?,`max_hearts` = ?,`last_heart_refill_at` = ?,`daily_xp_goal` = ?,`today_xp` = ?,`today_xp_date` = ?,`weekly_league_xp` = ?,`league_name` = ?,`league_week_id` = ?,`updated_at` = ? WHERE `id` = ?";
       }
 
       @Override
@@ -87,8 +104,25 @@ public final class ProgressStatsDao_Impl implements ProgressStatsDao {
         }
         statement.bindLong(9, entity.getTotalXp());
         statement.bindLong(10, entity.getLongestStreak());
-        statement.bindLong(11, entity.getUpdatedAt());
-        statement.bindLong(12, entity.getId());
+        statement.bindLong(11, entity.getHearts());
+        statement.bindLong(12, entity.getMaxHearts());
+        statement.bindLong(13, entity.getLastHeartRefillAt());
+        statement.bindLong(14, entity.getDailyXpGoal());
+        statement.bindLong(15, entity.getTodayXp());
+        if (entity.getTodayXpDate() == null) {
+          statement.bindNull(16);
+        } else {
+          statement.bindString(16, entity.getTodayXpDate());
+        }
+        statement.bindLong(17, entity.getWeeklyLeagueXp());
+        statement.bindString(18, entity.getLeagueName());
+        if (entity.getLeagueWeekId() == null) {
+          statement.bindNull(19);
+        } else {
+          statement.bindString(19, entity.getLeagueWeekId());
+        }
+        statement.bindLong(20, entity.getUpdatedAt());
+        statement.bindLong(21, entity.getId());
       }
     });
   }
@@ -132,6 +166,15 @@ public final class ProgressStatsDao_Impl implements ProgressStatsDao {
           final int _cursorIndexOfLastActiveDate = CursorUtil.getColumnIndexOrThrow(_cursor, "last_active_date");
           final int _cursorIndexOfTotalXp = CursorUtil.getColumnIndexOrThrow(_cursor, "total_xp");
           final int _cursorIndexOfLongestStreak = CursorUtil.getColumnIndexOrThrow(_cursor, "longest_streak");
+          final int _cursorIndexOfHearts = CursorUtil.getColumnIndexOrThrow(_cursor, "hearts");
+          final int _cursorIndexOfMaxHearts = CursorUtil.getColumnIndexOrThrow(_cursor, "max_hearts");
+          final int _cursorIndexOfLastHeartRefillAt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_heart_refill_at");
+          final int _cursorIndexOfDailyXpGoal = CursorUtil.getColumnIndexOrThrow(_cursor, "daily_xp_goal");
+          final int _cursorIndexOfTodayXp = CursorUtil.getColumnIndexOrThrow(_cursor, "today_xp");
+          final int _cursorIndexOfTodayXpDate = CursorUtil.getColumnIndexOrThrow(_cursor, "today_xp_date");
+          final int _cursorIndexOfWeeklyLeagueXp = CursorUtil.getColumnIndexOrThrow(_cursor, "weekly_league_xp");
+          final int _cursorIndexOfLeagueName = CursorUtil.getColumnIndexOrThrow(_cursor, "league_name");
+          final int _cursorIndexOfLeagueWeekId = CursorUtil.getColumnIndexOrThrow(_cursor, "league_week_id");
           final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
           final ProgressStatsEntity _result;
           if (_cursor.moveToFirst()) {
@@ -159,9 +202,35 @@ public final class ProgressStatsDao_Impl implements ProgressStatsDao {
             _tmpTotalXp = _cursor.getInt(_cursorIndexOfTotalXp);
             final int _tmpLongestStreak;
             _tmpLongestStreak = _cursor.getInt(_cursorIndexOfLongestStreak);
+            final int _tmpHearts;
+            _tmpHearts = _cursor.getInt(_cursorIndexOfHearts);
+            final int _tmpMaxHearts;
+            _tmpMaxHearts = _cursor.getInt(_cursorIndexOfMaxHearts);
+            final long _tmpLastHeartRefillAt;
+            _tmpLastHeartRefillAt = _cursor.getLong(_cursorIndexOfLastHeartRefillAt);
+            final int _tmpDailyXpGoal;
+            _tmpDailyXpGoal = _cursor.getInt(_cursorIndexOfDailyXpGoal);
+            final int _tmpTodayXp;
+            _tmpTodayXp = _cursor.getInt(_cursorIndexOfTodayXp);
+            final String _tmpTodayXpDate;
+            if (_cursor.isNull(_cursorIndexOfTodayXpDate)) {
+              _tmpTodayXpDate = null;
+            } else {
+              _tmpTodayXpDate = _cursor.getString(_cursorIndexOfTodayXpDate);
+            }
+            final int _tmpWeeklyLeagueXp;
+            _tmpWeeklyLeagueXp = _cursor.getInt(_cursorIndexOfWeeklyLeagueXp);
+            final String _tmpLeagueName;
+            _tmpLeagueName = _cursor.getString(_cursorIndexOfLeagueName);
+            final String _tmpLeagueWeekId;
+            if (_cursor.isNull(_cursorIndexOfLeagueWeekId)) {
+              _tmpLeagueWeekId = null;
+            } else {
+              _tmpLeagueWeekId = _cursor.getString(_cursorIndexOfLeagueWeekId);
+            }
             final long _tmpUpdatedAt;
             _tmpUpdatedAt = _cursor.getLong(_cursorIndexOfUpdatedAt);
-            _result = new ProgressStatsEntity(_tmpId,_tmpLessonsStarted,_tmpPracticedPhrases,_tmpSampleAudioPlays,_tmpSpeakingAttempts,_tmpAiCoachRequests,_tmpStreakDays,_tmpLastActiveDate,_tmpTotalXp,_tmpLongestStreak,_tmpUpdatedAt);
+            _result = new ProgressStatsEntity(_tmpId,_tmpLessonsStarted,_tmpPracticedPhrases,_tmpSampleAudioPlays,_tmpSpeakingAttempts,_tmpAiCoachRequests,_tmpStreakDays,_tmpLastActiveDate,_tmpTotalXp,_tmpLongestStreak,_tmpHearts,_tmpMaxHearts,_tmpLastHeartRefillAt,_tmpDailyXpGoal,_tmpTodayXp,_tmpTodayXpDate,_tmpWeeklyLeagueXp,_tmpLeagueName,_tmpLeagueWeekId,_tmpUpdatedAt);
           } else {
             _result = null;
           }
@@ -199,6 +268,15 @@ public final class ProgressStatsDao_Impl implements ProgressStatsDao {
           final int _cursorIndexOfLastActiveDate = CursorUtil.getColumnIndexOrThrow(_cursor, "last_active_date");
           final int _cursorIndexOfTotalXp = CursorUtil.getColumnIndexOrThrow(_cursor, "total_xp");
           final int _cursorIndexOfLongestStreak = CursorUtil.getColumnIndexOrThrow(_cursor, "longest_streak");
+          final int _cursorIndexOfHearts = CursorUtil.getColumnIndexOrThrow(_cursor, "hearts");
+          final int _cursorIndexOfMaxHearts = CursorUtil.getColumnIndexOrThrow(_cursor, "max_hearts");
+          final int _cursorIndexOfLastHeartRefillAt = CursorUtil.getColumnIndexOrThrow(_cursor, "last_heart_refill_at");
+          final int _cursorIndexOfDailyXpGoal = CursorUtil.getColumnIndexOrThrow(_cursor, "daily_xp_goal");
+          final int _cursorIndexOfTodayXp = CursorUtil.getColumnIndexOrThrow(_cursor, "today_xp");
+          final int _cursorIndexOfTodayXpDate = CursorUtil.getColumnIndexOrThrow(_cursor, "today_xp_date");
+          final int _cursorIndexOfWeeklyLeagueXp = CursorUtil.getColumnIndexOrThrow(_cursor, "weekly_league_xp");
+          final int _cursorIndexOfLeagueName = CursorUtil.getColumnIndexOrThrow(_cursor, "league_name");
+          final int _cursorIndexOfLeagueWeekId = CursorUtil.getColumnIndexOrThrow(_cursor, "league_week_id");
           final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updated_at");
           final ProgressStatsEntity _result;
           if (_cursor.moveToFirst()) {
@@ -226,9 +304,35 @@ public final class ProgressStatsDao_Impl implements ProgressStatsDao {
             _tmpTotalXp = _cursor.getInt(_cursorIndexOfTotalXp);
             final int _tmpLongestStreak;
             _tmpLongestStreak = _cursor.getInt(_cursorIndexOfLongestStreak);
+            final int _tmpHearts;
+            _tmpHearts = _cursor.getInt(_cursorIndexOfHearts);
+            final int _tmpMaxHearts;
+            _tmpMaxHearts = _cursor.getInt(_cursorIndexOfMaxHearts);
+            final long _tmpLastHeartRefillAt;
+            _tmpLastHeartRefillAt = _cursor.getLong(_cursorIndexOfLastHeartRefillAt);
+            final int _tmpDailyXpGoal;
+            _tmpDailyXpGoal = _cursor.getInt(_cursorIndexOfDailyXpGoal);
+            final int _tmpTodayXp;
+            _tmpTodayXp = _cursor.getInt(_cursorIndexOfTodayXp);
+            final String _tmpTodayXpDate;
+            if (_cursor.isNull(_cursorIndexOfTodayXpDate)) {
+              _tmpTodayXpDate = null;
+            } else {
+              _tmpTodayXpDate = _cursor.getString(_cursorIndexOfTodayXpDate);
+            }
+            final int _tmpWeeklyLeagueXp;
+            _tmpWeeklyLeagueXp = _cursor.getInt(_cursorIndexOfWeeklyLeagueXp);
+            final String _tmpLeagueName;
+            _tmpLeagueName = _cursor.getString(_cursorIndexOfLeagueName);
+            final String _tmpLeagueWeekId;
+            if (_cursor.isNull(_cursorIndexOfLeagueWeekId)) {
+              _tmpLeagueWeekId = null;
+            } else {
+              _tmpLeagueWeekId = _cursor.getString(_cursorIndexOfLeagueWeekId);
+            }
             final long _tmpUpdatedAt;
             _tmpUpdatedAt = _cursor.getLong(_cursorIndexOfUpdatedAt);
-            _result = new ProgressStatsEntity(_tmpId,_tmpLessonsStarted,_tmpPracticedPhrases,_tmpSampleAudioPlays,_tmpSpeakingAttempts,_tmpAiCoachRequests,_tmpStreakDays,_tmpLastActiveDate,_tmpTotalXp,_tmpLongestStreak,_tmpUpdatedAt);
+            _result = new ProgressStatsEntity(_tmpId,_tmpLessonsStarted,_tmpPracticedPhrases,_tmpSampleAudioPlays,_tmpSpeakingAttempts,_tmpAiCoachRequests,_tmpStreakDays,_tmpLastActiveDate,_tmpTotalXp,_tmpLongestStreak,_tmpHearts,_tmpMaxHearts,_tmpLastHeartRefillAt,_tmpDailyXpGoal,_tmpTodayXp,_tmpTodayXpDate,_tmpWeeklyLeagueXp,_tmpLeagueName,_tmpLeagueWeekId,_tmpUpdatedAt);
           } else {
             _result = null;
           }

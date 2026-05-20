@@ -276,8 +276,19 @@ class TutorViewModel(
 
     fun gradeCurrentPhrase(grade: ReviewGrade) {
         val phrase = uiState.currentPhrase ?: return
+        val currentStats = progressRepository.getStats()
+        if (grade == ReviewGrade.Again && !currentStats.hasHearts) {
+            uiState = uiState.copy(
+                stats = currentStats,
+                statusMessage = "No hearts left. Review easy phrases or wait for hearts to refill."
+            )
+            return
+        }
         val isNewPhrase = spacedReviewRepository.getReviewState(phrase.id) == null
         progressRepository.recordPhrasePracticed()
+        if (grade == ReviewGrade.Again) {
+            progressRepository.recordMistake()
+        }
         if (isNewPhrase) {
             dailyGoalRepository.recordNewPhrase()
         } else {
@@ -556,6 +567,7 @@ class TutorViewModel(
                 result.overall.pronunciation?.roundToInt()?.let { score ->
                     spacedReviewRepository.recordPronunciationScore(phrase.id, score)
                 }
+                progressRepository.recordPronunciationAssessed()
                 uiState.copy(
                     isAssessing = false,
                     pronunciationResult = result,

@@ -53,6 +53,10 @@ fun ProgressScreen(
         }
 
         item {
+            XpProgressCard(stats = stats)
+        }
+
+        item {
             ProgressCard(label = "Local phrase library", value = phraseLibraryStats.phraseCount.toString())
         }
 
@@ -73,6 +77,54 @@ fun ProgressScreen(
         }
         item {
             ProgressCard(label = "Day streak", value = stats.streakDays.toString())
+        }
+        item {
+            ProgressCard(label = "Longest streak", value = stats.longestStreak.toString())
+        }
+        item {
+            ProgressCard(label = "Hearts", value = "${stats.hearts}/${stats.maxHearts}")
+        }
+        item {
+            ProgressCard(label = "League", value = stats.leagueName)
+        }
+    }
+}
+
+@Composable
+private fun XpProgressCard(stats: ProgressStats) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = "Level ${stats.level}",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            LinearProgressIndicator(
+                progress = { stats.levelProgressPercent / 100f },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(
+                text = "${stats.totalXp} XP total · ${stats.xpIntoCurrentLevel}/${stats.xpNeededForNextLevel} XP to next level",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            LinearProgressIndicator(
+                progress = { stats.dailyXpPercent / 100f },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(
+                text = "Daily XP goal: ${stats.todayXp}/${stats.dailyXpGoal}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }

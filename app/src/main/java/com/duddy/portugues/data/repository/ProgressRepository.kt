@@ -8,5 +8,9 @@ interface ProgressRepository {
     fun recordPhrasePracticed()
     fun recordSampleAudioPlayed()
     fun recordSpeakingAttempt()
+    fun recordPronunciationAssessed()
     fun recordAiCoachRequest()
+    fun recordMistake()
+    fun refillHearts()
+    fun setDailyXpGoal(goalXp: Int)
 }
