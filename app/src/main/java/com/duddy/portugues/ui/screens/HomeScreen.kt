@@ -1,0 +1,205 @@
+package com.duddy.portugues.ui.screens
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.duddy.portugues.data.model.DailyGoalProgress
+import com.duddy.portugues.data.model.GuidedSessionStep
+
+@Composable
+fun HomeScreen(
+    phraseCount: Int,
+    favoriteCount: Int,
+    dueReviewCount: Int,
+    dailyGoal: DailyGoalProgress,
+    guidedSessionSteps: List<GuidedSessionStep>,
+    statusMessage: String,
+    onStartSmartReview: () -> Unit,
+    onStartGuidedSession: () -> Unit,
+    onStartPractice: () -> Unit,
+    onPracticeFavorites: () -> Unit,
+    onViewLessons: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Duddy Português",
+            style = MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = "A speaking-first tutor for Brazilian Portuguese.",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = "$phraseCount phrases · $favoriteCount saved · $dueReviewCount due",
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Text(
+            text = statusMessage,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        DailyPlanCard(
+            guidedSessionSteps = guidedSessionSteps,
+            dueReviewCount = dueReviewCount,
+            onStartGuidedSession = onStartGuidedSession
+        )
+
+        DailyGoalCard(
+            dailyGoal = dailyGoal,
+            onStartGuidedSession = onStartGuidedSession
+        )
+
+        Button(
+            onClick = onStartSmartReview,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Start smart review")
+        }
+        Button(
+            onClick = onStartPractice,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Browse all practice")
+        }
+        OutlinedButton(
+            onClick = onPracticeFavorites,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Practice saved phrases")
+        }
+        OutlinedButton(
+            onClick = onViewLessons,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Search lessons")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+@Composable
+private fun DailyGoalCard(
+    dailyGoal: DailyGoalProgress,
+    onStartGuidedSession: () -> Unit
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = "Today's goal",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            LinearProgressIndicator(
+                progress = { dailyGoal.percentComplete / 100f },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(
+                text = "${dailyGoal.percentComplete}% complete · ${dailyGoal.streakDays} day streak",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = dailyGoal.encouragementMessage,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "${dailyGoal.completedNewPhrases}/${dailyGoal.targets.newPhrasesPerDay} new · " +
+                    "${dailyGoal.completedReviews}/${dailyGoal.targets.reviewsPerDay} reviews · " +
+                    "${dailyGoal.completedSpeakingAttempts}/${dailyGoal.targets.speakingAttemptsPerDay} speaking",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Button(
+                onClick = onStartGuidedSession,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Start today's session")
+            }
+        }
+    }
+}
+
+@Composable
+private fun DailyPlanCard(
+    guidedSessionSteps: List<GuidedSessionStep>,
+    dueReviewCount: Int,
+    onStartGuidedSession: () -> Unit
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = "Today's guided session",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "$dueReviewCount due reviews plus a few fresh phrases.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            guidedSessionSteps.forEachIndexed { index, step ->
+                Text(
+                    text = "${index + 1}. ${step.title} · ${step.technique.displayName}",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = step.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Button(
+                onClick = onStartGuidedSession,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Start guided session")
+            }
+        }
+    }
+}
