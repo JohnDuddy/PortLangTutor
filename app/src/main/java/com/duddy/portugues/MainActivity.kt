@@ -16,10 +16,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.duddy.portugues.data.auth.AuthState
 import com.duddy.portugues.data.auth.SupabaseAuthClient
 import com.duddy.portugues.data.local.migration.SharedPreferencesToRoomMigration
+import com.duddy.portugues.data.preferences.OnboardingPreferences
 import com.duddy.portugues.presentation.AuthViewModel
 import com.duddy.portugues.presentation.TutorViewModel
 import com.duddy.portugues.ui.screens.DuddyApp
 import com.duddy.portugues.ui.screens.auth.AuthScreen
+import com.duddy.portugues.ui.screens.onboarding.OnboardingFlow
 import com.duddy.portugues.ui.theme.DuddyPortuguesTheme
 import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.launch
@@ -72,6 +74,45 @@ private fun SplashLoading() {
 
 @Composable
 private fun AppRoot(context: android.content.Context) {
+    var onboardingComplete by remember {
+        mutableStateOf(OnboardingPreferences.isCompleted(context))
+    }
+    var trialMode by remember { mutableStateOf(false) }
+    var trialSessionUsed by remember {
+        mutableStateOf(OnboardingPreferences.hasUsedTrialSession(context))
+    }
+
+    if (!onboardingComplete) {
+        OnboardingFlow(
+            onComplete = { placementLevel, dailyMinutes ->
+                OnboardingPreferences.complete(
+                    context = context,
+                    placementLevel = placementLevel,
+                    dailyMinutes = dailyMinutes,
+                )
+                onboardingComplete = true
+            },
+        )
+        return
+    }
+
+    if (trialMode) {
+        val tutorVm: TutorViewModel = viewModel(
+            factory = TutorViewModel.factory(context, authClient = null)
+        )
+        DuddyApp(
+            viewModel = tutorVm,
+            isTrialMode = true,
+            trialSessionUsed = trialSessionUsed,
+            onTrialSessionStarted = {
+                OnboardingPreferences.markTrialSessionUsed(context)
+                trialSessionUsed = true
+            },
+            onExitTrial = { trialMode = false },
+        )
+        return
+    }
+
     if (!SupabaseAuthClient.isConfigured()) {
         val tutorVm: TutorViewModel = viewModel(
             factory = TutorViewModel.factory(context, authClient = null)
@@ -92,7 +133,11 @@ private fun AppRoot(context: android.content.Context) {
 
         is AuthState.SignedOut -> {
             val authVm: AuthViewModel = viewModel(factory = AuthViewModel.factory(authClient))
-            AuthScreen(viewModel = authVm)
+            AuthScreen(
+                viewModel = authVm,
+                onContinueWithoutAccount = { trialMode = true },
+                trialAvailable = !trialSessionUsed,
+            )
         }
 
         is AuthState.SignedIn -> {

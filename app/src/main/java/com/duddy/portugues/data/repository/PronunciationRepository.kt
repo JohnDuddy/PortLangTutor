@@ -83,7 +83,11 @@ class RemotePronunciationRepository(
         http.newCall(request).execute().use { resp ->
             val bodyStr = resp.body?.string().orEmpty()
             if (!resp.isSuccessful) {
-                throw IOException(extractError(bodyStr) ?: bodyStr.take(240))
+                throw BackendRequestException(
+                    statusCode = resp.code,
+                    backendMessage = extractError(bodyStr)
+                        ?: bodyStr.take(240).ifBlank { "Pronunciation request failed." },
+                )
             }
             parse(bodyStr, referenceText)
         }

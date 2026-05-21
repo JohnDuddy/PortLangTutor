@@ -11,11 +11,13 @@ import com.duddy.portugues.data.model.GuidedSessionStep
 import com.duddy.portugues.data.model.LearningTechnique
 import com.duddy.portugues.data.model.Lesson
 import com.duddy.portugues.data.model.Phrase
+import com.duddy.portugues.data.model.PhraseDifficulty
 import com.duddy.portugues.data.model.ReviewGrade
 import com.duddy.portugues.BuildConfig
 import com.duddy.portugues.audio.PcmAudioRecorder
 import com.duddy.portugues.data.auth.SupabaseAuthClient
 import com.duddy.portugues.data.local.DuddyDatabase
+import com.duddy.portugues.data.preferences.OnboardingPreferences
 import com.duddy.portugues.data.repository.AiCoachRepository
 import com.duddy.portugues.data.repository.DailyGoalRepository
 import com.duddy.portugues.data.repository.FavoritePhraseRepository
@@ -43,22 +45,26 @@ class TutorViewModel(
     private val aiCoachRepository: AiCoachRepository = RemoteAiCoachRepository(),
     private val pronunciationRepository: PronunciationRepository? = null,
     private val audioRecorder: PcmAudioRecorder? = null,
+    private val startingDifficulty: PhraseDifficulty = PhraseDifficulty.A1,
 ) : ViewModel() {
     private val allPhrases = phraseRepository.getPhrases()
+    private val recommendedPhrases =
+        allPhrases.filter { phrase -> phrase.difficulty.ordinal <= startingDifficulty.ordinal }
+            .ifEmpty { allPhrases }
     private val libraryStats = phraseRepository.getLibraryStats()
 
     var uiState by mutableStateOf(
         TutorUiState(
             lessons = phraseRepository.getLessons(),
             allPhrases = allPhrases,
-            activePhrases = allPhrases,
+            activePhrases = recommendedPhrases,
             favoritePhraseIds = favoritePhraseRepository.getFavoritePhraseIds(),
             guidedSessionSteps = dailySessionSteps(),
             dueReviewCount = duePhraseIds().size,
             phraseLibraryStats = libraryStats,
             stats = progressRepository.getStats(),
             dailyGoal = dailyGoal(),
-            statusMessage = "Loaded ${libraryStats.phraseCount} local phrases. Choose a lesson to begin."
+            statusMessage = "Loaded ${libraryStats.phraseCount} local phrases. Starting level: ${startingDifficulty.name}."
         )
     )
         private set
@@ -155,7 +161,7 @@ class TutorViewModel(
     fun startGuidedSession() {
         dailyGoalRepository.recordPracticeMinutes()
         val adaptiveIds = spacedReviewRepository.getAdaptivePhraseIds(
-            allPhraseIds = allPhrases.map { phrase -> phrase.id },
+            allPhraseIds = recommendedPhrases.map { phrase -> phrase.id },
             favoritePhraseIds = uiState.favoritePhraseIds,
             limit = GUIDED_SESSION_LIMIT
         )
@@ -477,7 +483,7 @@ class TutorViewModel(
                     aiFeedback = "",
                     stats = progressRepository.getStats(),
                     dailyGoal = dailyGoal(),
-                    statusMessage = exception.message ?: "AI coach request failed."
+                    statusMessage = UserFacingErrors.forAiCoach(exception)
                 )
             }
         }
@@ -501,8 +507,8 @@ class TutorViewModel(
         }
         if (!recorder.hasPermission()) {
             uiState = uiState.copy(
-                statusMessage = "Grant microphone permission to record.",
-                pronunciationError = "Microphone permission required."
+                statusMessage = UserFacingErrors.MICROPHONE_PERMISSION_REQUIRED,
+                pronunciationError = UserFacingErrors.MICROPHONE_PERMISSION_REQUIRED
             )
             return
         }
@@ -516,9 +522,10 @@ class TutorViewModel(
                 )
             }
             .onFailure {
+                val message = UserFacingErrors.forMicrophoneStart(it)
                 uiState = uiState.copy(
-                    pronunciationError = it.message ?: "Couldn't start microphone.",
-                    statusMessage = "Microphone error."
+                    pronunciationError = message,
+                    statusMessage = message
                 )
             }
     }
@@ -580,11 +587,12 @@ class TutorViewModel(
                     } ?: "Assessment complete."
                 )
             } catch (e: Exception) {
+                val message = formatPronunciationError(e)
                 uiState.copy(
                     isAssessing = false,
-                    pronunciationError = formatPronunciationError(e),
+                    pronunciationError = message,
                     dailyGoal = dailyGoal(),
-                    statusMessage = "Couldn't score that attempt."
+                    statusMessage = message
                 )
             }
         }
@@ -604,17 +612,7 @@ class TutorViewModel(
         PhraseSearchNormalizer.normalize(value)
 
     private fun formatPronunciationError(error: Exception): String {
-        val rawMessage = error.message.orEmpty()
-        val backendUrl = BuildConfig.DUDDY_BACKEND_URL
-        val isLocalDevBackend = backendUrl.contains("127.0.0.1") || backendUrl.contains("10.0.2.2")
-        val isConnectionFailure = rawMessage.contains("failed to connect", ignoreCase = true) ||
-            rawMessage.contains("connection refused", ignoreCase = true)
-
-        if (isLocalDevBackend && isConnectionFailure) {
-            return "Could not reach the local pronunciation backend at $backendUrl. For a USB-connected phone, keep the phone plugged in and run tools\\repair_phone_backend_tunnel.ps1 or adb reverse tcp:8010 tcp:8010, then try again."
-        }
-
-        return rawMessage.ifBlank { "Pronunciation assessment failed." }
+        return UserFacingErrors.forPronunciation(error)
     }
 
     private fun duePhraseIds(limit: Int = Int.MAX_VALUE): List<String> =
@@ -713,6 +711,7 @@ class TutorViewModel(
                         aiCoachRepository        = aiCoach,
                         pronunciationRepository  = pronRepo,
                         audioRecorder            = recorder,
+                        startingDifficulty       = OnboardingPreferences.placementLevel(context),
                     ) as T
                 }
             }

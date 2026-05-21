@@ -72,7 +72,11 @@ class RemoteAiCoachRepository(
         http.newCall(builder.build()).execute().use { response ->
             val body = response.body?.string().orEmpty()
             if (!response.isSuccessful) {
-                throw IOException(extractError(body) ?: body.take(240).ifBlank { "AI coach request failed." })
+                throw BackendRequestException(
+                    statusCode = response.code,
+                    backendMessage = extractError(body)
+                        ?: body.take(240).ifBlank { "AI coach request failed." },
+                )
             }
 
             parseFeedback(body)
