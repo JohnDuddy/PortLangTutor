@@ -1,0 +1,39 @@
+name: Backend Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-deploy.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Fly.io when configured
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          if [ -z "$FLY_API_TOKEN" ]; then
+            echo "FLY_API_TOKEN is not configured; skipping Fly.io deploy."
+            exit 0
+          fi
+          curl -L https://fly.io/install.sh | sh
+          ~/.fly/bin/flyctl deploy --remote-only
+
+      - name: Railway deploy instructions
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          if [ -n "$RAILWAY_TOKEN" ]; then
+            echo "RAILWAY_TOKEN is configured. Add the Railway CLI deploy command for your service once the Railway project is linked."
+          else
+            echo "RAILWAY_TOKEN is not configured; skipping Railway deploy."
+          fi

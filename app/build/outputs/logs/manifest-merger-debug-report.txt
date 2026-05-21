@@ -44,6 +44,7 @@ MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7] C:\Users\drdud\.g
 MERGED from [androidx.lifecycle:lifecycle-process:2.8.7] C:\Users\drdud\.gradle\caches\8.11.1\transforms\4cec90dd9c54491dc2fe7cd77e7ce998\transformed\lifecycle-process-2.8.7\AndroidManifest.xml:17:1-35:12
 MERGED from [androidx.lifecycle:lifecycle-viewmodel-compose-android:2.8.7] C:\Users\drdud\.gradle\caches\8.11.1\transforms\799b84d2bc4e6aa7194d493dc682e65f\transformed\lifecycle-viewmodel-compose-release\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.ui:ui-android:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\fa2b0f7d09c0d00eb0a7c645dc8fba33\transformed\ui-release\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.compose.ui:ui-test-manifest:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\a495c6808a57f8419f165a7f10383eb1\transformed\ui-test-manifest-1.7.6\AndroidManifest.xml:17:1-28:12
 MERGED from [androidx.compose.ui:ui-tooling-android:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\b69ee9bb2ef5861071c9c31e47d7d17a\transformed\ui-tooling-release\AndroidManifest.xml:17:1-28:12
 MERGED from [androidx.activity:activity-compose:1.9.3] C:\Users\drdud\.gradle\caches\8.11.1\transforms\62cc22038f5c7e89852a3597b896d26a\transformed\activity-compose-1.9.3\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.room:room-runtime:2.6.1] C:\Users\drdud\.gradle\caches\8.11.1\transforms\a14ef1b6647243440d17454f9dc06c9c\transformed\room-runtime-2.6.1\AndroidManifest.xml:17:1-31:12
@@ -54,11 +55,11 @@ MERGED from [androidx.datastore:datastore-core-android:1.1.1] C:\Users\drdud\.gr
 MERGED from [androidx.datastore:datastore-android:1.1.1] C:\Users\drdud\.gradle\caches\8.11.1\transforms\fe1476c62e06108dbe3efd425cd955be\transformed\datastore-release\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.datastore:datastore-preferences-android:1.1.1] C:\Users\drdud\.gradle\caches\8.11.1\transforms\e2e51f95231cb8080eaa3dba7f96327b\transformed\datastore-preferences-release\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\drdud\.gradle\caches\8.11.1\transforms\59adc41900f05b6674de1f39d15dbeb1\transformed\core-runtime-2.2.0\AndroidManifest.xml:17:1-22:12
-MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\drdud\.gradle\caches\8.11.1\transforms\f436c3687b4be6a1a3daa98527ced50f\transformed\interpolator-1.0.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\drdud\.gradle\caches\8.11.1\transforms\8e6b7bd015f7ca9106b60d47191e32c8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:17:1-55:12
 MERGED from [com.russhwolf:multiplatform-settings-no-arg-android-debug:1.2.0] C:\Users\drdud\.gradle\caches\8.11.1\transforms\060a97a601d4715a17f7c0652ac60474\transformed\multiplatform-settings-no-arg-debug\AndroidManifest.xml:17:1-35:12
 MERGED from [androidx.startup:startup-runtime:1.2.0] C:\Users\drdud\.gradle\caches\8.11.1\transforms\15c6341370a895481b74c75fd22d0782\transformed\startup-runtime-1.2.0\AndroidManifest.xml:17:1-31:12
 MERGED from [androidx.tracing:tracing:1.2.0] C:\Users\drdud\.gradle\caches\8.11.1\transforms\dc5f7dad558a4ef39d5244231cc3030f\transformed\tracing-1.2.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\drdud\.gradle\caches\8.11.1\transforms\f436c3687b4be6a1a3daa98527ced50f\transformed\interpolator-1.0.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\drdud\.gradle\caches\8.11.1\transforms\61c470dc2e77ab8ac68fc86bed7b878d\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:17:1-27:12
 MERGED from [androidx.compose.runtime:runtime-android:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\f6f718bdfa4d5a6e3005ac95bf9f49f8\transformed\runtime-release\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.runtime:runtime-saveable-android:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\b955be3e5dccd691426c0ee923f5d9c4\transformed\runtime-saveable-release\AndroidManifest.xml:2:1-7:12
@@ -103,6 +104,8 @@ MERGED from [androidx.core:core:1.15.0] C:\Users\drdud\.gradle\caches\8.11.1\tra
 MERGED from [androidx.core:core:1.15.0] C:\Users\drdud\.gradle\caches\8.11.1\transforms\199b69d7dfe7e5482811fae1c40ec371\transformed\core-1.15.0\AndroidManifest.xml:28:5-89
 MERGED from [androidx.lifecycle:lifecycle-process:2.8.7] C:\Users\drdud\.gradle\caches\8.11.1\transforms\4cec90dd9c54491dc2fe7cd77e7ce998\transformed\lifecycle-process-2.8.7\AndroidManifest.xml:23:5-33:19
 MERGED from [androidx.lifecycle:lifecycle-process:2.8.7] C:\Users\drdud\.gradle\caches\8.11.1\transforms\4cec90dd9c54491dc2fe7cd77e7ce998\transformed\lifecycle-process-2.8.7\AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.compose.ui:ui-test-manifest:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\a495c6808a57f8419f165a7f10383eb1\transformed\ui-test-manifest-1.7.6\AndroidManifest.xml:22:5-26:19
+MERGED from [androidx.compose.ui:ui-test-manifest:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\a495c6808a57f8419f165a7f10383eb1\transformed\ui-test-manifest-1.7.6\AndroidManifest.xml:22:5-26:19
 MERGED from [androidx.compose.ui:ui-tooling-android:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\b69ee9bb2ef5861071c9c31e47d7d17a\transformed\ui-tooling-release\AndroidManifest.xml:22:5-26:19
 MERGED from [androidx.compose.ui:ui-tooling-android:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\b69ee9bb2ef5861071c9c31e47d7d17a\transformed\ui-tooling-release\AndroidManifest.xml:22:5-26:19
 MERGED from [androidx.room:room-runtime:2.6.1] C:\Users\drdud\.gradle\caches\8.11.1\transforms\a14ef1b6647243440d17454f9dc06c9c\transformed\room-runtime-2.6.1\AndroidManifest.xml:23:5-29:19
@@ -241,6 +244,8 @@ MERGED from [androidx.lifecycle:lifecycle-viewmodel-compose-android:2.8.7] C:\Us
 MERGED from [androidx.lifecycle:lifecycle-viewmodel-compose-android:2.8.7] C:\Users\drdud\.gradle\caches\8.11.1\transforms\799b84d2bc4e6aa7194d493dc682e65f\transformed\lifecycle-viewmodel-compose-release\AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.ui:ui-android:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\fa2b0f7d09c0d00eb0a7c645dc8fba33\transformed\ui-release\AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.ui:ui-android:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\fa2b0f7d09c0d00eb0a7c645dc8fba33\transformed\ui-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.ui:ui-test-manifest:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\a495c6808a57f8419f165a7f10383eb1\transformed\ui-test-manifest-1.7.6\AndroidManifest.xml:20:5-44
+MERGED from [androidx.compose.ui:ui-test-manifest:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\a495c6808a57f8419f165a7f10383eb1\transformed\ui-test-manifest-1.7.6\AndroidManifest.xml:20:5-44
 MERGED from [androidx.compose.ui:ui-tooling-android:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\b69ee9bb2ef5861071c9c31e47d7d17a\transformed\ui-tooling-release\AndroidManifest.xml:20:5-44
 MERGED from [androidx.compose.ui:ui-tooling-android:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\b69ee9bb2ef5861071c9c31e47d7d17a\transformed\ui-tooling-release\AndroidManifest.xml:20:5-44
 MERGED from [androidx.activity:activity-compose:1.9.3] C:\Users\drdud\.gradle\caches\8.11.1\transforms\62cc22038f5c7e89852a3597b896d26a\transformed\activity-compose-1.9.3\AndroidManifest.xml:5:5-44
@@ -261,8 +266,6 @@ MERGED from [androidx.datastore:datastore-preferences-android:1.1.1] C:\Users\dr
 MERGED from [androidx.datastore:datastore-preferences-android:1.1.1] C:\Users\drdud\.gradle\caches\8.11.1\transforms\e2e51f95231cb8080eaa3dba7f96327b\transformed\datastore-preferences-release\AndroidManifest.xml:20:5-44
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\drdud\.gradle\caches\8.11.1\transforms\59adc41900f05b6674de1f39d15dbeb1\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\drdud\.gradle\caches\8.11.1\transforms\59adc41900f05b6674de1f39d15dbeb1\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
-MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\drdud\.gradle\caches\8.11.1\transforms\f436c3687b4be6a1a3daa98527ced50f\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
-MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\drdud\.gradle\caches\8.11.1\transforms\f436c3687b4be6a1a3daa98527ced50f\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\drdud\.gradle\caches\8.11.1\transforms\8e6b7bd015f7ca9106b60d47191e32c8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:21:5-44
 MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\drdud\.gradle\caches\8.11.1\transforms\8e6b7bd015f7ca9106b60d47191e32c8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:21:5-44
 MERGED from [com.russhwolf:multiplatform-settings-no-arg-android-debug:1.2.0] C:\Users\drdud\.gradle\caches\8.11.1\transforms\060a97a601d4715a17f7c0652ac60474\transformed\multiplatform-settings-no-arg-debug\AndroidManifest.xml:21:5-44
@@ -271,6 +274,8 @@ MERGED from [androidx.startup:startup-runtime:1.2.0] C:\Users\drdud\.gradle\cach
 MERGED from [androidx.startup:startup-runtime:1.2.0] C:\Users\drdud\.gradle\caches\8.11.1\transforms\15c6341370a895481b74c75fd22d0782\transformed\startup-runtime-1.2.0\AndroidManifest.xml:21:5-44
 MERGED from [androidx.tracing:tracing:1.2.0] C:\Users\drdud\.gradle\caches\8.11.1\transforms\dc5f7dad558a4ef39d5244231cc3030f\transformed\tracing-1.2.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.tracing:tracing:1.2.0] C:\Users\drdud\.gradle\caches\8.11.1\transforms\dc5f7dad558a4ef39d5244231cc3030f\transformed\tracing-1.2.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\drdud\.gradle\caches\8.11.1\transforms\f436c3687b4be6a1a3daa98527ced50f\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\drdud\.gradle\caches\8.11.1\transforms\f436c3687b4be6a1a3daa98527ced50f\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\drdud\.gradle\caches\8.11.1\transforms\61c470dc2e77ab8ac68fc86bed7b878d\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\drdud\.gradle\caches\8.11.1\transforms\61c470dc2e77ab8ac68fc86bed7b878d\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.compose.runtime:runtime-android:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\f6f718bdfa4d5a6e3005ac95bf9f49f8\transformed\runtime-release\AndroidManifest.xml:5:5-44
@@ -351,6 +356,12 @@ ADDED from [androidx.lifecycle:lifecycle-process:2.8.7] C:\Users\drdud\.gradle\c
 		ADDED from [androidx.lifecycle:lifecycle-process:2.8.7] C:\Users\drdud\.gradle\caches\8.11.1\transforms\4cec90dd9c54491dc2fe7cd77e7ce998\transformed\lifecycle-process-2.8.7\AndroidManifest.xml:31:17-49
 	android:name
 		ADDED from [androidx.lifecycle:lifecycle-process:2.8.7] C:\Users\drdud\.gradle\caches\8.11.1\transforms\4cec90dd9c54491dc2fe7cd77e7ce998\transformed\lifecycle-process-2.8.7\AndroidManifest.xml:30:17-78
+activity#androidx.activity.ComponentActivity
+ADDED from [androidx.compose.ui:ui-test-manifest:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\a495c6808a57f8419f165a7f10383eb1\transformed\ui-test-manifest-1.7.6\AndroidManifest.xml:23:9-25:39
+	android:exported
+		ADDED from [androidx.compose.ui:ui-test-manifest:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\a495c6808a57f8419f165a7f10383eb1\transformed\ui-test-manifest-1.7.6\AndroidManifest.xml:25:13-36
+	android:name
+		ADDED from [androidx.compose.ui:ui-test-manifest:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\a495c6808a57f8419f165a7f10383eb1\transformed\ui-test-manifest-1.7.6\AndroidManifest.xml:24:13-63
 activity#androidx.compose.ui.tooling.PreviewActivity
 ADDED from [androidx.compose.ui:ui-tooling-android:1.7.6] C:\Users\drdud\.gradle\caches\8.11.1\transforms\b69ee9bb2ef5861071c9c31e47d7d17a\transformed\ui-tooling-release\AndroidManifest.xml:23:9-25:39
 	android:exported

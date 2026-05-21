@@ -7,7 +7,6 @@ import com.duddy.portugues.data.model.ReviewGrade
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import kotlin.math.roundToInt
 
 class SharedPreferencesSpacedReviewRepository(context: Context) : SpacedReviewRepository {
     private val sharedPreferences: SharedPreferences =
@@ -46,17 +45,9 @@ class SharedPreferencesSpacedReviewRepository(context: Context) : SpacedReviewRe
             correctStreak = 0
         )
 
-        val nextEase = nextEase(current.easeFactor, grade)
-        val nextInterval = nextInterval(current.intervalDays, nextEase, grade)
-        val nextState = PhraseReviewState(
-            phraseId = phraseId,
-            dueDate = dayString(nextInterval),
-            intervalDays = nextInterval,
-            easeFactor = nextEase,
-            reviewCount = current.reviewCount + 1,
-            correctStreak = if (grade == ReviewGrade.Again) 0 else current.correctStreak + 1,
-            lastScore = current.lastScore
-        )
+        val nextState = SpacedReviewScheduler
+            .schedule(current, grade, ::dayString)
+            .copy(lastScore = current.lastScore)
 
         sharedPreferences.edit()
             .putString(key(phraseId, FIELD_DUE_DATE), nextState.dueDate)
@@ -91,22 +82,6 @@ class SharedPreferencesSpacedReviewRepository(context: Context) : SpacedReviewRe
         return nextState
     }
 
-    private fun nextEase(currentEase: Double, grade: ReviewGrade): Double =
-        when (grade) {
-            ReviewGrade.Again -> currentEase - 0.25
-            ReviewGrade.Hard -> currentEase - 0.10
-            ReviewGrade.Good -> currentEase
-            ReviewGrade.Easy -> currentEase + 0.15
-        }.coerceIn(1.30, 2.80)
-
-    private fun nextInterval(currentInterval: Int, ease: Double, grade: ReviewGrade): Int =
-        when (grade) {
-            ReviewGrade.Again -> 0
-            ReviewGrade.Hard -> 1
-            ReviewGrade.Good -> if (currentInterval == 0) 1 else (currentInterval * ease).roundToInt().coerceAtLeast(1)
-            ReviewGrade.Easy -> if (currentInterval == 0) 3 else (currentInterval * (ease + 0.35)).roundToInt().coerceAtLeast(2)
-        }
-
     private fun dayString(offsetDays: Int): String {
         val calendar = Calendar.getInstance().apply {
             add(Calendar.DAY_OF_YEAR, offsetDays)
@@ -118,7 +93,7 @@ class SharedPreferencesSpacedReviewRepository(context: Context) : SpacedReviewRe
 
     private companion object {
         const val PREFERENCES_NAME = "duddy_portugues_spaced_reviews"
-        const val DEFAULT_EASE = 2.30
+        const val DEFAULT_EASE = SpacedReviewScheduler.DEFAULT_EASE
         const val FIELD_DUE_DATE = "due_date"
         const val FIELD_INTERVAL_DAYS = "interval_days"
         const val FIELD_EASE_FACTOR = "ease_factor"

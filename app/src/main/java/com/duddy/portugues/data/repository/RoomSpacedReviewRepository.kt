@@ -8,7 +8,6 @@ import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import kotlin.math.roundToInt
 
 /**
  * Room-backed implementation of [SpacedReviewRepository].
@@ -70,14 +69,13 @@ class RoomSpacedReviewRepository(
             correctStreak = 0,
         )
 
-        val nextEase     = nextEase(current.easeFactor, grade)
-        val nextInterval = nextInterval(current.intervalDays, nextEase, grade)
+        val scheduled = SpacedReviewScheduler.schedule(current.toModel(), grade, ::dayString)
         val next = current.copy(
-            dueDate       = dayString(nextInterval),
-            intervalDays  = nextInterval,
-            easeFactor    = nextEase,
-            reviewCount   = current.reviewCount + 1,
-            correctStreak = if (grade == ReviewGrade.Again) 0 else current.correctStreak + 1,
+            dueDate       = scheduled.dueDate,
+            intervalDays  = scheduled.intervalDays,
+            easeFactor    = scheduled.easeFactor,
+            reviewCount   = scheduled.reviewCount,
+            correctStreak = scheduled.correctStreak,
             updatedAt     = System.currentTimeMillis(),
             synced        = false,
         )
@@ -102,23 +100,6 @@ class RoomSpacedReviewRepository(
         dao.upsert(next)
         next.toModel()
     }
-
-    // ── SRS math (same as SharedPrefs version) ─────────────────────────────
-    private fun nextEase(current: Double, grade: ReviewGrade): Double =
-        when (grade) {
-            ReviewGrade.Again -> current - 0.25
-            ReviewGrade.Hard  -> current - 0.10
-            ReviewGrade.Good  -> current
-            ReviewGrade.Easy  -> current + 0.15
-        }.coerceIn(1.30, 2.80)
-
-    private fun nextInterval(current: Int, ease: Double, grade: ReviewGrade): Int =
-        when (grade) {
-            ReviewGrade.Again -> 0
-            ReviewGrade.Hard  -> 1
-            ReviewGrade.Good  -> if (current == 0) 1 else (current * ease).roundToInt().coerceAtLeast(1)
-            ReviewGrade.Easy  -> if (current == 0) 3 else (current * (ease + 0.35)).roundToInt().coerceAtLeast(2)
-        }
 
     private fun dayString(offsetDays: Int): String {
         val cal = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, offsetDays) }
@@ -153,6 +134,6 @@ class RoomSpacedReviewRepository(
     )
 
     private companion object {
-        const val DEFAULT_EASE = 2.30
+        const val DEFAULT_EASE = SpacedReviewScheduler.DEFAULT_EASE
     }
 }

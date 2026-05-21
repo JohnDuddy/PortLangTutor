@@ -21,6 +21,7 @@ import com.duddy.portugues.data.repository.DailyGoalRepository
 import com.duddy.portugues.data.repository.FavoritePhraseRepository
 import com.duddy.portugues.data.repository.LocalPhraseRepository
 import com.duddy.portugues.data.repository.PhraseRepository
+import com.duddy.portugues.data.repository.PhraseSearchNormalizer
 import com.duddy.portugues.data.repository.ProgressRepository
 import com.duddy.portugues.data.repository.PronunciationRepository
 import com.duddy.portugues.data.repository.RemoteAiCoachRepository
@@ -30,7 +31,6 @@ import com.duddy.portugues.data.repository.RoomProgressRepository
 import com.duddy.portugues.data.repository.RoomSpacedReviewRepository
 import com.duddy.portugues.data.repository.SharedPreferencesDailyGoalRepository
 import com.duddy.portugues.data.repository.SpacedReviewRepository
-import java.text.Normalizer
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -601,9 +601,7 @@ class TutorViewModel(
     }
 
     private fun normalize(value: String): String =
-        Normalizer.normalize(value.lowercase(), Normalizer.Form.NFD)
-            .replace(Regex("\\p{Mn}+"), "")
-            .trim()
+        PhraseSearchNormalizer.normalize(value)
 
     private fun formatPronunciationError(error: Exception): String {
         val rawMessage = error.message.orEmpty()
