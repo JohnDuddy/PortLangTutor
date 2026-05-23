@@ -1,6 +1,7 @@
 """OpenAI tutor coach endpoint."""
 
 import logging
+import math
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -75,9 +76,13 @@ async def coach(
 
     # 3. Coerce score to int and fill optional production fields
     try:
-        feedback["score"] = max(0, min(100, int(round(float(feedback.get("score", 0))))))
+        feedback["score"] = max(0, min(100, int(math.floor(float(feedback.get("score", 0)) + 0.5))))
     except (TypeError, ValueError):
         feedback["score"] = 0
+    feedback.setdefault("fix", "Repeat the model phrase slowly and compare each sound.")
+    feedback.setdefault("model", body.target_phrase)
+    feedback.setdefault("next_rep", f"Say: {body.target_phrase}")
+    feedback.setdefault("encouragement", "Good effort. Try one focused repeat.")
     feedback["focus_area"] = normalize_focus(feedback.get("focus_area"), feedback["score"])
     feedback["adaptive_grade"] = normalize_grade(feedback.get("adaptive_grade"), feedback["score"])
     feedback.setdefault("provider", "openai")

@@ -96,7 +96,7 @@ On first launch:
 | Layer | Change |
 |-------|--------|
 | **Auth** | New `AuthScreen` (sign in / sign up / password reset) gates the app. Supabase JWT auto-persisted across launches. |
-| **Backend** | `backend/` — FastAPI service with auth, rate limiting, usage metering, OpenAI proxy, Azure pronunciation proxy. The legacy Node `server/server.mjs` still works. |
+| **Backend** | `backend/` — FastAPI service with auth, rate limiting, usage metering, OpenAI proxy, and Azure pronunciation proxy. |
 | **Database** | Room (SQLite) replaces SharedPreferences. Existing data migrates automatically on first launch. |
 | **Pronunciation** | New **🎤 Record / ■ Stop & score** workflow on the Practice screen. Tap Record, say the phrase, tap Stop. Azure scores each phoneme; the score card appears inline with the AI coach output. |
 | **AI coach** | Now sends pronunciation context (overall score + weakest phonemes) to the LLM. Returns structured JSON: score / fix / model / next_rep / encouragement. |
@@ -131,8 +131,6 @@ DuddyPortugues/
 │   ├── Dockerfile
 │   ├── requirements.txt
 │   └── README.md                        ← Backend setup + deployment guide
-├── server/                              ← LEGACY — original Node coach server
-│   └── server.mjs
 └── local.properties.example             ← NEW — config template
 ```
 
@@ -187,6 +185,38 @@ per-tier quotas above.
 
 ---
 
+## Release signing
+
+Release builds use R8 minification and resource shrinking. Local release builds
+stay unsigned unless a keystore is configured.
+
+Create the Play Store keystore once and store it securely:
+
+```bash
+keytool -genkeypair \
+  -v \
+  -keystore release.keystore \
+  -alias duddy-release \
+  -keyalg RSA \
+  -keysize 2048 \
+  -validity 10000 \
+  -storepass YOUR_STORE_PASSWORD \
+  -keypass YOUR_KEY_PASSWORD \
+  -dname "CN=Duddy Portugues, OU=Mobile, O=Duddy, L=City, ST=State, C=US"
+```
+
+For GitHub Actions, encode it and add the result as `KEYSTORE_BASE64`:
+
+```bash
+base64 -w0 release.keystore > keystore.b64
+```
+
+Required release secrets are `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`,
+`KEY_ALIAS`, `KEY_PASSWORD`, `PRODUCTION_BACKEND_URL`, `SUPABASE_URL`, and
+`SUPABASE_ANON_KEY`.
+
+---
+
 ## Troubleshooting
 
 | Symptom | Fix |
@@ -203,7 +233,7 @@ per-tier quotas above.
 ## Original feature roadmap
 
 See the evaluation in chat — Tier 2/3/4 features still to come:
-onboarding placement test, streak notifications, conversation mode,
-expanded content library, iOS port via KMM, RevenueCat subscriptions.
+streak notifications, conversation mode, expanded content library, iOS port
+via KMM, RevenueCat subscriptions.
 
 This v2 establishes the foundation those features will build on.

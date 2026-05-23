@@ -25,10 +25,6 @@ import com.duddy.portugues.presentation.TutorViewModel
 @Composable
 fun DuddyApp(
     viewModel: TutorViewModel,
-    isTrialMode: Boolean = false,
-    trialSessionUsed: Boolean = false,
-    onTrialSessionStarted: () -> Unit = {},
-    onExitTrial: () -> Unit = {},
 ) {
     val uiState = viewModel.uiState
     val context = LocalContext.current
@@ -59,14 +55,7 @@ fun DuddyApp(
         Scaffold(
             bottomBar = {
                 NavigationBar {
-                    val availableScreens = if (isTrialMode && !trialSessionUsed) {
-                        listOf(AppScreen.Home)
-                    } else if (isTrialMode) {
-                        listOf(AppScreen.Home, AppScreen.Practice)
-                    } else {
-                        AppScreen.entries
-                    }
-                    availableScreens.forEach { screen ->
+                    AppScreen.entries.forEach { screen ->
                         NavigationBarItem(
                             selected = uiState.currentScreen == screen,
                             onClick = { viewModel.navigateTo(screen) },
@@ -88,27 +77,16 @@ fun DuddyApp(
                     guidedSessionSteps = uiState.guidedSessionSteps,
                     statusMessage = uiState.statusMessage,
                     showFirstRunTip = showHomeTooltip,
-                    isTrialMode = isTrialMode,
-                    trialSessionUsed = trialSessionUsed,
-                    onExitTrial = onExitTrial,
                     onDismissFirstRunTip = {
                         OnboardingPreferences.markHomeTooltipSeen(context)
                         showHomeTooltip = false
                     },
                     onStartSmartReview = viewModel::startSmartReview,
-                    onStartGuidedSession = {
-                        if (isTrialMode && trialSessionUsed) {
-                            onExitTrial()
-                        } else {
-                            if (isTrialMode) {
-                                onTrialSessionStarted()
-                            }
-                            viewModel.startGuidedSession()
-                        }
-                    },
+                    onStartGuidedSession = viewModel::startGuidedSession,
                     onStartPractice = viewModel::practiceAllPhrases,
                     onPracticeFavorites = viewModel::practiceFavoritePhrases,
                     onViewLessons = { viewModel.navigateTo(AppScreen.Lessons) },
+                    onStartTesting = { viewModel.navigateTo(AppScreen.Testing) },
                     modifier = modifier
                 )
 
@@ -134,6 +112,21 @@ fun DuddyApp(
                     onPlayAll = { startListenPlayback() },
                     onStop = { stopListenPlayback() },
                     onLessonListenSelected = { lesson -> startListenPlayback(lesson.category) },
+                    modifier = modifier
+                )
+
+                AppScreen.Testing -> TestingScreen(
+                    uiState = uiState,
+                    onStartLevel = viewModel::startTestingLevel,
+                    onChoiceSelected = viewModel::selectTestingChoice,
+                    onFillBlankChanged = viewModel::updateTestingFillBlankAnswer,
+                    onSubmitFillBlank = viewModel::submitTestingFillBlankAnswer,
+                    onNextQuestion = viewModel::nextTestingQuestion,
+                    onRestartLevel = viewModel::restartTestingLevel,
+                    onStartRecording = viewModel::startRecording,
+                    onStopRecordingAndAssess = viewModel::stopRecordingAndAssess,
+                    onCancelRecording = viewModel::cancelRecording,
+                    onClearPronunciation = viewModel::clearPronunciationResult,
                     modifier = modifier
                 )
 
@@ -176,6 +169,7 @@ private fun AppScreen.navIcon(): String =
         AppScreen.Home -> "H"
         AppScreen.Lessons -> "L"
         AppScreen.Listen -> "A"
+        AppScreen.Testing -> "T"
         AppScreen.Practice -> "P"
         AppScreen.Progress -> "%"
     }

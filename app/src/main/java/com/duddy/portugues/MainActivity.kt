@@ -77,10 +77,7 @@ private fun AppRoot(context: android.content.Context) {
     var onboardingComplete by remember {
         mutableStateOf(OnboardingPreferences.isCompleted(context))
     }
-    var trialMode by remember { mutableStateOf(false) }
-    var trialSessionUsed by remember {
-        mutableStateOf(OnboardingPreferences.hasUsedTrialSession(context))
-    }
+    var localMode by remember { mutableStateOf(false) }
 
     if (!onboardingComplete) {
         OnboardingFlow(
@@ -96,20 +93,11 @@ private fun AppRoot(context: android.content.Context) {
         return
     }
 
-    if (trialMode) {
+    if (localMode) {
         val tutorVm: TutorViewModel = viewModel(
             factory = TutorViewModel.factory(context, authClient = null)
         )
-        DuddyApp(
-            viewModel = tutorVm,
-            isTrialMode = true,
-            trialSessionUsed = trialSessionUsed,
-            onTrialSessionStarted = {
-                OnboardingPreferences.markTrialSessionUsed(context)
-                trialSessionUsed = true
-            },
-            onExitTrial = { trialMode = false },
-        )
+        DuddyApp(viewModel = tutorVm)
         return
     }
 
@@ -135,8 +123,7 @@ private fun AppRoot(context: android.content.Context) {
             val authVm: AuthViewModel = viewModel(factory = AuthViewModel.factory(authClient))
             AuthScreen(
                 viewModel = authVm,
-                onContinueWithoutAccount = { trialMode = true },
-                trialAvailable = !trialSessionUsed,
+                onContinueWithoutAccount = { localMode = true },
             )
         }
 

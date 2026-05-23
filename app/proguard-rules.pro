@@ -9,6 +9,7 @@
 -keep class io.ktor.** { *; }
 -dontwarn io.ktor.**
 -dontwarn kotlinx.coroutines.debug.**
+-dontwarn androidx.compose.**
 
 # Room
 -keep class com.duddy.portugues.data.local.entity.** { *; }
@@ -38,6 +39,7 @@
 -dontwarn org.conscrypt.**
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**
+-dontwarn okio.**
 -keep class okhttp3.** { *; }
 -keep class okio.** { *; }
 

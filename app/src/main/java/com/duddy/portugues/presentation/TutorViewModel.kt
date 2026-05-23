@@ -13,6 +13,11 @@ import com.duddy.portugues.data.model.Lesson
 import com.duddy.portugues.data.model.Phrase
 import com.duddy.portugues.data.model.PhraseDifficulty
 import com.duddy.portugues.data.model.ReviewGrade
+import com.duddy.portugues.data.model.TestingAnswerResult
+import com.duddy.portugues.data.model.TestingLevel
+import com.duddy.portugues.data.model.TestingQuestion
+import com.duddy.portugues.data.model.TestingQuestionType
+import com.duddy.portugues.data.model.TestingUiState
 import com.duddy.portugues.BuildConfig
 import com.duddy.portugues.audio.PcmAudioRecorder
 import com.duddy.portugues.data.auth.SupabaseAuthClient
@@ -241,6 +246,138 @@ class TutorViewModel(
             dailyGoal = dailyGoal(),
             statusMessage = "Practicing saved phrases."
         )
+    }
+
+    fun startTestingLevel(level: TestingLevel) {
+        val questions = buildTestingQuestions(level)
+        if (questions.isEmpty()) {
+            uiState = uiState.copy(statusMessage = "No phrases are available for this test yet.")
+            return
+        }
+
+        dailyGoalRepository.recordPracticeMinutes()
+        val testingPhrases = questions.map { question -> question.phrase }
+        uiState = uiState.copy(
+            currentScreen = AppScreen.Testing,
+            activeLesson = null,
+            activePhrases = if (level == TestingLevel.LevelIII) testingPhrases else uiState.activePhrases,
+            currentPhraseIndex = 0,
+            isSmartReviewSession = false,
+            isGuidedSession = false,
+            isAnswerRevealed = level == TestingLevel.LevelIII,
+            currentTechnique = if (level == TestingLevel.LevelIII) {
+                LearningTechnique.ProductionPractice
+            } else {
+                LearningTechnique.RetrievalPractice
+            },
+            spokenText = "",
+            aiFeedback = "",
+            pronunciationResult = null,
+            pronunciationError = null,
+            testing = TestingUiState(
+                selectedLevel = level,
+                questions = questions,
+            ),
+            dailyGoal = dailyGoal(),
+            statusMessage = "${level.title} started. ${level.subtitle}"
+        )
+    }
+
+    fun selectTestingChoice(choice: String) {
+        val question = uiState.testing.currentQuestion ?: return
+        if (question.type != TestingQuestionType.MultipleChoice || uiState.testing.isCurrentAnswered) return
+        val isCorrect = choice == question.expectedAnswer
+        if (!isCorrect && question.mustRetryUntilCorrect) {
+            val wrongChoiceFeedback = wrongChoiceFeedbackFor(question, choice)
+            uiState = uiState.copy(
+                testing = uiState.testing.copy(
+                    selectedChoice = choice,
+                    lastResult = TestingAnswerResult(
+                        isCorrect = false,
+                        expectedAnswer = question.expectedAnswer,
+                        message = "Try again",
+                        spokenFeedback = choice,
+                        spokenFeedbackLocaleTag = wrongChoiceFeedback.choiceLocaleTag,
+                        spokenFeedbackTranslation = wrongChoiceFeedback.translation,
+                        spokenFeedbackTranslationLocaleTag = wrongChoiceFeedback.translationLocaleTag,
+                    ),
+                ),
+                statusMessage = "Try again",
+            )
+            return
+        }
+
+        recordTestingAnswer(
+            isCorrect = isCorrect,
+            expectedAnswer = question.expectedAnswer,
+            selectedChoice = choice,
+            message = if (isCorrect) {
+                "Correct."
+            } else {
+                "Not quite. Correct answer: ${question.expectedAnswer}"
+            }
+        )
+    }
+
+    fun updateTestingFillBlankAnswer(value: String) {
+        uiState = uiState.copy(
+            testing = uiState.testing.copy(fillBlankAnswer = value)
+        )
+    }
+
+    fun submitTestingFillBlankAnswer() {
+        val question = uiState.testing.currentQuestion ?: return
+        if (question.type != TestingQuestionType.FillBlank || uiState.testing.isCurrentAnswered) return
+        val learnerAnswer = uiState.testing.fillBlankAnswer
+        val isCorrect = normalizeForAnswer(learnerAnswer) == normalizeForAnswer(question.expectedAnswer)
+        recordTestingAnswer(
+            isCorrect = isCorrect,
+            expectedAnswer = question.expectedAnswer,
+            message = if (isCorrect) {
+                "Correct. You produced the missing word."
+            } else {
+                "Review this one. Missing word: ${question.expectedAnswer}"
+            }
+        )
+    }
+
+    fun nextTestingQuestion() {
+        val testing = uiState.testing
+        if (testing.questions.isEmpty()) return
+
+        if (testing.currentIndex >= testing.questions.lastIndex) {
+            uiState = uiState.copy(
+                testing = testing.copy(
+                    completed = true,
+                    selectedChoice = null,
+                    fillBlankAnswer = "",
+                    lastResult = null,
+                ),
+                pronunciationResult = null,
+                pronunciationError = null,
+                statusMessage = "Test complete. Score: ${testing.correctCount}/${testing.totalCount}."
+            )
+            return
+        }
+
+        val nextIndex = testing.currentIndex + 1
+        uiState = uiState.copy(
+            currentPhraseIndex = if (testing.selectedLevel == TestingLevel.LevelIII) nextIndex else uiState.currentPhraseIndex,
+            spokenText = "",
+            pronunciationResult = null,
+            pronunciationError = null,
+            testing = testing.copy(
+                currentIndex = nextIndex,
+                selectedChoice = null,
+                fillBlankAnswer = "",
+                lastResult = null,
+            ),
+            statusMessage = "Next test question ready."
+        )
+    }
+
+    fun restartTestingLevel() {
+        uiState.testing.selectedLevel?.let { level -> startTestingLevel(level) }
     }
 
     fun nextPhrase() {
@@ -575,7 +712,7 @@ class TutorViewModel(
                     spacedReviewRepository.recordPronunciationScore(phrase.id, score)
                 }
                 progressRepository.recordPronunciationAssessed()
-                uiState.copy(
+                val assessedState = uiState.copy(
                     isAssessing = false,
                     pronunciationResult = result,
                     spokenText = result.recognizedText,
@@ -586,6 +723,11 @@ class TutorViewModel(
                         "Score: ${"%.0f".format(it)} / 100"
                     } ?: "Assessment complete."
                 )
+                if (assessedState.currentScreen == AppScreen.Testing) {
+                    assessedState.withPronunciationTestingResult(result.overall.pronunciation?.roundToInt())
+                } else {
+                    assessedState
+                }
             } catch (e: Exception) {
                 val message = formatPronunciationError(e)
                 uiState.copy(
@@ -610,6 +752,12 @@ class TutorViewModel(
 
     private fun normalize(value: String): String =
         PhraseSearchNormalizer.normalize(value)
+
+    private fun normalizeForAnswer(value: String): String =
+        normalize(value)
+            .replace(Regex("[^a-z0-9 ]"), "")
+            .replace(Regex("\\s+"), " ")
+            .trim()
 
     private fun formatPronunciationError(error: Exception): String {
         return UserFacingErrors.forPronunciation(error)
@@ -644,6 +792,309 @@ class TutorViewModel(
         return mixed
     }
 
+    private fun buildTestingQuestions(level: TestingLevel): List<TestingQuestion> {
+        if (level == TestingLevel.LevelI) {
+            return buildLevelOneTranslationQuestions()
+        }
+        if (level == TestingLevel.LevelII) {
+            return buildLevelTwoListeningQuestions()
+        }
+
+        val eligible = when (level) {
+            TestingLevel.LevelI -> allPhrases
+            TestingLevel.LevelII -> allPhrases.filter { phrase ->
+                phrase.difficulty.ordinal <= PhraseDifficulty.B1.ordinal
+            }
+            TestingLevel.LevelIII -> allPhrases.filter { phrase -> phrase.speakingPractice }
+        }.ifEmpty { allPhrases }
+
+        val limit = when (level) {
+            TestingLevel.LevelI -> allPhrases.size
+            TestingLevel.LevelII -> LEVEL_TWO_QUESTION_LIMIT
+            TestingLevel.LevelIII -> LEVEL_THREE_QUESTION_LIMIT
+        }
+
+        return interleaveByCategory(eligible)
+            .distinctBy { phrase -> phrase.id }
+            .take(limit)
+            .mapIndexed { index, phrase ->
+                when (level) {
+                    TestingLevel.LevelI -> multipleChoiceQuestion(level, phrase)
+                    TestingLevel.LevelII -> if (index % 2 == 0) {
+                        multipleChoiceQuestion(level, phrase)
+                    } else {
+                        fillBlankQuestion(level, phrase)
+                    }
+                    TestingLevel.LevelIII -> TestingQuestion(
+                        id = "${level.name}-${phrase.id}",
+                        level = level,
+                        type = TestingQuestionType.Pronunciation,
+                        phrase = phrase,
+                        sectionTitle = "Pronunciation exam",
+                        prompt = "Say this phrase clearly in Brazilian Portuguese.",
+                        expectedAnswer = phrase.portuguese,
+                    )
+                }
+            }
+    }
+
+    private fun buildLevelOneTranslationQuestions(): List<TestingQuestion> {
+        val phrases = allPhrases.distinctBy { phrase -> phrase.id }
+        val englishToPortuguese = phrases.shuffled().map { phrase ->
+            multipleChoiceQuestion(
+                level = TestingLevel.LevelI,
+                phrase = phrase,
+                sectionTitle = "Section 1: English to Portuguese",
+                prompt = "Choose the Portuguese translation for:\n${phrase.english}",
+                expectedAnswer = phrase.portuguese,
+                choiceText = { candidate -> candidate.portuguese },
+                idSuffix = "en-pt",
+            )
+        }
+        val portugueseToEnglish = phrases.shuffled().map { phrase ->
+            multipleChoiceQuestion(
+                level = TestingLevel.LevelI,
+                phrase = phrase,
+                sectionTitle = "Section 2: Portuguese to English",
+                prompt = "Choose the English translation for:\n${phrase.portuguese}",
+                expectedAnswer = phrase.english,
+                choiceText = { candidate -> candidate.english },
+                idSuffix = "pt-en",
+            )
+        }
+
+        return englishToPortuguese + portugueseToEnglish
+    }
+
+    private fun buildLevelTwoListeningQuestions(): List<TestingQuestion> =
+        allPhrases
+            .distinctBy { phrase -> phrase.id }
+            .shuffled()
+            .map { phrase ->
+                if (listOf(true, false).random()) {
+                    multipleChoiceQuestion(
+                        level = TestingLevel.LevelII,
+                        phrase = phrase,
+                        sectionTitle = "Listening: English to Portuguese",
+                        prompt = "Listen to the English phrase, then choose the Portuguese translation.",
+                        expectedAnswer = phrase.portuguese,
+                        choiceText = { candidate -> candidate.portuguese },
+                        idSuffix = "listen-en-pt",
+                        spokenPrompt = phrase.english,
+                        spokenPromptLocaleTag = ENGLISH_TTS_LOCALE,
+                        spokenAnswer = phrase.portuguese,
+                        spokenAnswerLocaleTag = PORTUGUESE_TTS_LOCALE,
+                        mustRetryUntilCorrect = true,
+                    )
+                } else {
+                    multipleChoiceQuestion(
+                        level = TestingLevel.LevelII,
+                        phrase = phrase,
+                        sectionTitle = "Listening: Portuguese to English",
+                        prompt = "Listen to the Portuguese phrase, then choose the English translation.",
+                        expectedAnswer = phrase.english,
+                        choiceText = { candidate -> candidate.english },
+                        idSuffix = "listen-pt-en",
+                        spokenPrompt = phrase.portuguese,
+                        spokenPromptLocaleTag = PORTUGUESE_TTS_LOCALE,
+                        spokenAnswer = phrase.english,
+                        spokenAnswerLocaleTag = ENGLISH_TTS_LOCALE,
+                        mustRetryUntilCorrect = true,
+                    )
+                }
+            }
+
+    private fun wrongChoiceFeedbackFor(
+        question: TestingQuestion,
+        selectedChoice: String,
+    ): WrongChoiceFeedback {
+        val choiceIsPortuguese = question.spokenAnswerLocaleTag == PORTUGUESE_TTS_LOCALE
+        val selectedPhrase = if (choiceIsPortuguese) {
+            allPhrases.firstOrNull { phrase -> phrase.portuguese == selectedChoice }
+        } else {
+            allPhrases.firstOrNull { phrase -> phrase.english == selectedChoice }
+        }
+
+        return WrongChoiceFeedback(
+            choiceLocaleTag = question.spokenAnswerLocaleTag,
+            translation = if (choiceIsPortuguese) {
+                selectedPhrase?.english.orEmpty()
+            } else {
+                selectedPhrase?.portuguese.orEmpty()
+            },
+            translationLocaleTag = question.spokenPromptLocaleTag,
+        )
+    }
+
+    private data class WrongChoiceFeedback(
+        val choiceLocaleTag: String,
+        val translation: String,
+        val translationLocaleTag: String,
+    )
+
+    private fun multipleChoiceQuestion(
+        level: TestingLevel,
+        phrase: Phrase,
+        sectionTitle: String = "Multiple choice",
+        prompt: String = "Choose the Portuguese translation for:\n${phrase.english}",
+        expectedAnswer: String = phrase.portuguese,
+        choiceText: (Phrase) -> String = { candidate -> candidate.portuguese },
+        idSuffix: String = "mc",
+        spokenPrompt: String = "",
+        spokenPromptLocaleTag: String = "",
+        spokenAnswer: String = expectedAnswer,
+        spokenAnswerLocaleTag: String = "",
+        mustRetryUntilCorrect: Boolean = false,
+    ): TestingQuestion {
+        val distractors = allPhrases
+            .asSequence()
+            .filter { candidate -> candidate.id != phrase.id }
+            .filter { candidate -> candidate.category == phrase.category }
+            .map(choiceText)
+            .filter { option -> option != expectedAnswer }
+            .distinct()
+            .toList()
+            .shuffled()
+            .take(3)
+            .toMutableList()
+
+        if (distractors.size < 3) {
+            allPhrases
+                .asSequence()
+                .filter { candidate -> candidate.id != phrase.id }
+                .map(choiceText)
+                .filter { option -> option != expectedAnswer && option !in distractors }
+                .distinct()
+                .toList()
+                .shuffled()
+                .take(3 - distractors.size)
+                .forEach { option -> distractors += option }
+        }
+
+        val choices = distractors.toMutableList()
+        choices += expectedAnswer
+
+        return TestingQuestion(
+            id = "${level.name}-${phrase.id}-$idSuffix",
+            level = level,
+            type = TestingQuestionType.MultipleChoice,
+            phrase = phrase,
+            sectionTitle = sectionTitle,
+            prompt = prompt,
+            choices = choices.shuffled(),
+            expectedAnswer = expectedAnswer,
+            spokenPrompt = spokenPrompt,
+            spokenPromptLocaleTag = spokenPromptLocaleTag,
+            spokenAnswer = spokenAnswer,
+            spokenAnswerLocaleTag = spokenAnswerLocaleTag,
+            mustRetryUntilCorrect = mustRetryUntilCorrect,
+        )
+    }
+
+    private fun fillBlankQuestion(
+        level: TestingLevel,
+        phrase: Phrase,
+    ): TestingQuestion {
+        val (blankPrompt, expectedWord) = blankPromptFor(phrase.portuguese)
+        return TestingQuestion(
+            id = "${level.name}-${phrase.id}-blank",
+            level = level,
+            type = TestingQuestionType.FillBlank,
+            phrase = phrase,
+            sectionTitle = "Fill in the blank",
+            prompt = "Fill in the missing Portuguese word for: ${phrase.english}",
+            blankPrompt = blankPrompt,
+            expectedAnswer = expectedWord,
+        )
+    }
+
+    private fun blankPromptFor(portuguese: String): Pair<String, String> {
+        val words = portuguese.split(" ")
+        val blankIndex = words.indexOfFirst { word ->
+            normalizeForAnswer(word).length >= 4
+        }.takeIf { index -> index >= 0 } ?: words.lastIndex.coerceAtLeast(0)
+        val expected = words.getOrNull(blankIndex).orEmpty()
+        val prompt = words.mapIndexed { index, word ->
+            if (index == blankIndex) "____" else word
+        }.joinToString(" ")
+        return prompt to expected
+    }
+
+    private fun recordTestingAnswer(
+        isCorrect: Boolean,
+        expectedAnswer: String,
+        message: String,
+        selectedChoice: String? = uiState.testing.selectedChoice,
+    ) {
+        val testing = uiState.testing
+        val question = testing.currentQuestion ?: return
+        val alreadyAnswered = question.id in testing.answeredQuestionIds
+        val result = TestingAnswerResult(
+            isCorrect = isCorrect,
+            expectedAnswer = expectedAnswer,
+            message = message,
+        )
+
+        if (!alreadyAnswered) {
+            progressRepository.recordPhrasePracticed()
+            dailyGoalRepository.recordPracticeMinutes()
+        }
+
+        uiState = uiState.copy(
+            testing = testing.copy(
+                selectedChoice = selectedChoice,
+                answeredQuestionIds = if (alreadyAnswered) {
+                    testing.answeredQuestionIds
+                } else {
+                    testing.answeredQuestionIds + question.id
+                },
+                correctCount = if (!alreadyAnswered && isCorrect) {
+                    testing.correctCount + 1
+                } else {
+                    testing.correctCount
+                },
+                lastResult = result,
+            ),
+            stats = progressRepository.getStats(),
+            dailyGoal = dailyGoal(),
+            statusMessage = message,
+        )
+    }
+
+    private fun TutorUiState.withPronunciationTestingResult(score: Int?): TutorUiState {
+        val testingState = testing
+        val question = testingState.currentQuestion ?: return this
+        if (
+            question.type != TestingQuestionType.Pronunciation ||
+            question.id in testingState.answeredQuestionIds ||
+            score == null
+        ) {
+            return this
+        }
+
+        val passed = score >= PRONUNCIATION_PASSING_SCORE
+        val result = TestingAnswerResult(
+            isCorrect = passed,
+            expectedAnswer = question.expectedAnswer,
+            message = if (passed) {
+                "Pronunciation exam passed: $score/100."
+            } else {
+                "Pronunciation needs another pass: $score/100. Aim for $PRONUNCIATION_PASSING_SCORE+."
+            },
+            pronunciationScore = score,
+        )
+
+        return copy(
+            testing = testingState.copy(
+                answeredQuestionIds = testingState.answeredQuestionIds + question.id,
+                correctCount = if (passed) testingState.correctCount + 1 else testingState.correctCount,
+                lastResult = result,
+                pronunciationScores = testingState.pronunciationScores + (question.id to score),
+            ),
+            statusMessage = result.message,
+        )
+    }
+
     private fun dailySessionSteps(): List<GuidedSessionStep> =
         listOf(
             GuidedSessionStep(
@@ -676,6 +1127,11 @@ class TutorViewModel(
     companion object {
         private const val SMART_REVIEW_LIMIT = 20
         private const val GUIDED_SESSION_LIMIT = 20
+        private const val LEVEL_TWO_QUESTION_LIMIT = 12
+        private const val LEVEL_THREE_QUESTION_LIMIT = 8
+        private const val PRONUNCIATION_PASSING_SCORE = 75
+        private const val ENGLISH_TTS_LOCALE = "en-US"
+        private const val PORTUGUESE_TTS_LOCALE = "pt-BR"
 
         fun factory(
             context: Context,

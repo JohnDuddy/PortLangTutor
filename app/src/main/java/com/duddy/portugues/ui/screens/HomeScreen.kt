@@ -34,15 +34,13 @@ fun HomeScreen(
     guidedSessionSteps: List<GuidedSessionStep>,
     statusMessage: String,
     showFirstRunTip: Boolean,
-    isTrialMode: Boolean,
-    trialSessionUsed: Boolean,
-    onExitTrial: () -> Unit,
     onDismissFirstRunTip: () -> Unit,
     onStartSmartReview: () -> Unit,
     onStartGuidedSession: () -> Unit,
     onStartPractice: () -> Unit,
     onPracticeFavorites: () -> Unit,
     onViewLessons: () -> Unit,
+    onStartTesting: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -73,13 +71,6 @@ fun HomeScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        if (isTrialMode) {
-            TrialCard(
-                trialSessionUsed = trialSessionUsed,
-                onExitTrial = onExitTrial,
-            )
-        }
-
         if (showFirstRunTip) {
             FirstRunTipCard(onDismiss = onDismissFirstRunTip)
         }
@@ -98,40 +89,39 @@ fun HomeScreen(
             onStartGuidedSession = onStartGuidedSession
         )
 
-        if (!isTrialMode) {
-            Button(
-                onClick = onStartSmartReview,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Start smart review")
-            }
-            Button(
-                onClick = onStartPractice,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Browse all practice")
-            }
-            OutlinedButton(
-                onClick = onPracticeFavorites,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Practice saved phrases")
-            }
-            OutlinedButton(
-                onClick = onViewLessons,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Search lessons")
-            }
+        TestingCenterCard(onStartTesting = onStartTesting)
+
+        Button(
+            onClick = onStartSmartReview,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Start smart review")
+        }
+        Button(
+            onClick = onStartPractice,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Browse all practice")
+        }
+        OutlinedButton(
+            onClick = onPracticeFavorites,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Practice saved phrases")
+        }
+        OutlinedButton(
+            onClick = onViewLessons,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Search lessons")
         }
         Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
 @Composable
-private fun TrialCard(
-    trialSessionUsed: Boolean,
-    onExitTrial: () -> Unit,
+private fun TestingCenterCard(
+    onStartTesting: () -> Unit,
 ) {
     Card(
         colors = CardDefaults.cardColors(
@@ -144,24 +134,20 @@ private fun TrialCard(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = if (trialSessionUsed) "Trial session active" else "Free trial session",
-                style = MaterialTheme.typography.titleMedium,
+                text = "Testing center",
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = if (trialSessionUsed) {
-                    "Finish this guided session, then create a free account to save progress and unlock the full app."
-                } else {
-                    "Try one guided lesson before signup. Your full progress starts when you create a free account."
-                },
+                text = "Level I: translation multiple choice. Level II: randomized listening multiple choice. Level III: pronunciation exam.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            OutlinedButton(
-                onClick = onExitTrial,
+            Button(
+                onClick = onStartTesting,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(if (trialSessionUsed) "Create account after this" else "Back to sign in")
+                Text("Open Testing")
             }
         }
     }

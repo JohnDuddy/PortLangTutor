@@ -9,7 +9,6 @@ object OnboardingPreferences {
     private const val KEY_PLACEMENT_LEVEL = "placement_level"
     private const val KEY_DAILY_MINUTES = "daily_minutes"
     private const val KEY_HOME_TOOLTIP_SEEN = "has_seen_home_tooltip"
-    private const val KEY_TRIAL_SESSION_USED = "has_used_trial_session"
 
     fun isCompleted(context: Context): Boolean =
         prefs(context).getBoolean(KEY_COMPLETED, false)
@@ -38,15 +37,6 @@ object OnboardingPreferences {
     fun markHomeTooltipSeen(context: Context) {
         prefs(context).edit()
             .putBoolean(KEY_HOME_TOOLTIP_SEEN, true)
-            .apply()
-    }
-
-    fun hasUsedTrialSession(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_TRIAL_SESSION_USED, false)
-
-    fun markTrialSessionUsed(context: Context) {
-        prefs(context).edit()
-            .putBoolean(KEY_TRIAL_SESSION_USED, true)
             .apply()
     }
 

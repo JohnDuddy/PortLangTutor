@@ -9,6 +9,7 @@ import com.duddy.portugues.data.model.Phrase
 import com.duddy.portugues.data.model.PhraseLibraryStats
 import com.duddy.portugues.data.model.ProgressStats
 import com.duddy.portugues.data.model.PronunciationResult
+import com.duddy.portugues.data.model.TestingUiState
 
 data class TutorUiState(
     val currentScreen: AppScreen = AppScreen.Home,
@@ -32,9 +33,7 @@ data class TutorUiState(
     val spokenText: String = "",
 
     /**
-     * Default points at the FastAPI backend's /v1/coach endpoint. The previous
-     * Node `/coach` endpoint at port 8787 is still supported if you point this
-     * field at it manually — the AI coach repository handles both shapes.
+     * Default points at the FastAPI backend's /v1/coach endpoint.
      */
     val aiServerUrl: String = "${BuildConfig.DUDDY_BACKEND_URL}/v1/coach",
 
@@ -46,6 +45,7 @@ data class TutorUiState(
     val isAssessing: Boolean = false,
     val pronunciationResult: PronunciationResult? = null,
     val pronunciationError: String? = null,
+    val testing: TestingUiState = TestingUiState(),
 
     val stats: ProgressStats = ProgressStats(
         lessonsStarted = 0,

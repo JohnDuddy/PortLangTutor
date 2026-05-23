@@ -1,5 +1,6 @@
 package com.duddy.portugues.audio
 
+import android.annotation.SuppressLint
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -49,6 +50,7 @@ class PcmAudioRecorder(private val context: Context) {
      * @throws SecurityException if RECORD_AUDIO not granted.
      * @throws IllegalStateException if AudioRecord fails to initialise.
      */
+    @SuppressLint("MissingPermission")
     fun start() {
         require(hasPermission()) { "RECORD_AUDIO permission required" }
         if (recording) return

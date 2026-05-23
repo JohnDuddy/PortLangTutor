@@ -22,7 +22,6 @@ import com.duddy.portugues.presentation.AuthViewModel
 fun AuthScreen(
     viewModel: AuthViewModel,
     onContinueWithoutAccount: (() -> Unit)? = null,
-    trialAvailable: Boolean = onContinueWithoutAccount != null,
 ) {
     val state = viewModel.uiState
     var showPassword by remember { mutableStateOf(false) }
@@ -162,22 +161,15 @@ fun AuthScreen(
                 }
             }
 
-            if (onContinueWithoutAccount != null && trialAvailable) {
+            if (onContinueWithoutAccount != null) {
                 Spacer(Modifier.height(10.dp))
                 OutlinedButton(
                     onClick = onContinueWithoutAccount,
                     enabled = !state.loading,
                     modifier = Modifier.fillMaxWidth().height(48.dp),
                 ) {
-                    Text("Try one session first")
+                    Text("Continue without account")
                 }
-            } else if (onContinueWithoutAccount != null) {
-                Spacer(Modifier.height(10.dp))
-                Text(
-                    text = "Trial session used. Create a free account to save progress.",
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
             }
 
             // ── Footer links ──

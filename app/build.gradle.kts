@@ -1,12 +1,20 @@
 import java.util.Properties
 
-        plugins {
-            id("com.android.application")
-            id("org.jetbrains.kotlin.android")
-            id("org.jetbrains.kotlin.plugin.compose")
-            id("org.jetbrains.kotlin.plugin.serialization")
-            id("com.google.devtools.ksp")
-        }
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.kotlin.plugin.serialization")
+    id("com.google.devtools.ksp")
+}
+
+val localProperties = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+
+fun localOrDefault(key: String, default: String): String =
+    localProperties.getProperty(key) ?: System.getenv(key) ?: default
 
 android {
     namespace = "com.duddy.portugues"
@@ -29,13 +37,6 @@ android {
         //   DUDDY_BACKEND_URL=https://api.duddy.app
         //   SUPABASE_URL=https://YOUR-PROJECT.supabase.co
         //   SUPABASE_ANON_KEY=eyJ...
-        val localProps = Properties().apply {
-            val f = rootProject.file("local.properties")
-            if (f.exists()) f.inputStream().use { load(it) }
-        }
-        fun localOrDefault(key: String, default: String): String =
-            (localProps[key] as? String) ?: System.getenv(key) ?: default
-
         buildConfigField(
             "String", "DUDDY_BACKEND_URL",
             "\"${localOrDefault("DUDDY_BACKEND_URL", "http://10.0.2.2:8010")}\""
@@ -50,6 +51,15 @@ android {
         )
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file(localOrDefault("RELEASE_KEYSTORE_PATH", "release.keystore"))
+            storePassword = localOrDefault("KEYSTORE_PASSWORD", "")
+            keyAlias = localOrDefault("KEY_ALIAS", "")
+            keyPassword = localOrDefault("KEY_PASSWORD", "")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -58,6 +68,19 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            val releaseSigning = signingConfigs.getByName("release")
+            if (
+                releaseSigning.storeFile?.exists() == true &&
+                !releaseSigning.storePassword.isNullOrBlank() &&
+                !releaseSigning.keyAlias.isNullOrBlank() &&
+                !releaseSigning.keyPassword.isNullOrBlank()
+            ) {
+                signingConfig = releaseSigning
+            }
+        }
+        debug {
+            isMinifyEnabled = false
         }
     }
 
